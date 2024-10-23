@@ -1,0 +1,61 @@
+cmake_minimum_required(VERSION 3.10)
+
+# Set the project name and version
+project(OpenVMBytecodeRuntime VERSION 1.0.0)
+
+# Set the library output directory
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+# Specify the include directory for header files
+include_directories(include)
+
+# Include the FetchContent module
+include(FetchContent)
+
+
+# Glob source files
+file(GLOB_RECURSE SOURCES
+    src/*.cpp
+)
+
+# Glob header files
+file(GLOB_RECURSE HEADERS
+    include/*.hpp
+)
+
+# Create the static library
+add_library(OpenVMBytecodeRuntime STATIC ${SOURCES})
+
+# Set the include directory for the library
+target_include_directories(OpenVMBytecodeRuntime
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+
+
+# Create a ZIP file containing the include directory and the library
+include(InstallRequiredSystemLibraries)
+
+set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+set(CPACK_GENERATOR "ZIP")
+set(CPACK_SOURCE_GENERATOR "ZIP")
+set(CPACK_OUTPUT_FILE_PREFIX ${CMAKE_BINARY_DIR})
+
+# Install the include directory and the library
+install(DIRECTORY include/
+        DESTINATION include)
+
+install(TARGETS OpenVMBytecodeRuntime
+        EXPORT OpenVMBytecodeRuntimeTargets
+        ARCHIVE DESTINATION lib)
+
+# Create an export file to make the library usable by other projects
+install(EXPORT OpenVMBytecodeRuntimeTargets
+    FILE OpenVMBytecodeRuntimeConfig.cmake
+    NAMESPACE The_OpenVM_Project::
+    DESTINATION lib/cmake/OpenVMBytecodeRuntime)
+
+# Enable CPack for packaging
+include(CPack)
